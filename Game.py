@@ -2,9 +2,9 @@ from tkinter import *
 import numpy as np
 
 class Game:
-    def __init__(self, root, size, firstplayer, coef=20):
+    def __init__(self, size, firstplayer, coef=20):
         #Saving size and Gui coef
-        self.root = root
+        self.root = Tk()
         self.size = size
         self.coef = coef
 
@@ -25,7 +25,7 @@ class Game:
         self.matrix[1][1] = 1
         self.matrix[self.size - 2][self.size - 2] = 2
         # GUI creation
-        self.canvas = Canvas(root, width=self.size * self.coef + 2 * self.coef, height=self.size * self.coef + 2 * self.coef)
+        self.canvas = Canvas(self.root, width=self.size * self.coef + 2 * self.coef, height=self.size * self.coef + 2 * self.coef)
         self.canvas.pack()
         frame = Frame(self.root)
         frame.pack(side=BOTTOM)
