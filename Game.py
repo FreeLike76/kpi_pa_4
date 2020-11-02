@@ -2,7 +2,7 @@ from tkinter import *
 import numpy as np
 
 class Game:
-    def __init__(self, size, firstplayer, coef=20):
+    def __init__(self, size, firstplayer=True, coef=20):
         #Saving size and Gui coef
         self.root = Tk()
         self.size = size
@@ -10,20 +10,24 @@ class Game:
 
         #Player makes a move first
         if(firstplayer):
-            self.turnId = 1
+            self.turnId = 0
             self.color = "blue"
         else:
-            self.turnId = 2
+            self.turnId = 1
             self.color = "red"
 
         #Players coords
-        self.xHist = ['x', 1, self.size - 2]
-        self.yHist = ['y', 1, self.size - 2]
+        self.xHist = [2, self.size - 1]
+        self.yHist = [2, self.size - 1]
 
         # Inf field
-        self.matrix = np.zeros((self.size, self.size))
-        self.matrix[1][1] = 1
-        self.matrix[self.size - 2][self.size - 2] = 2
+        self.matrix = np.zeros((self.size + 2, self.size + 2))
+        for i in range (1, self.size + 1):
+            for j in range (1, self.size + 1):
+                self.matrix[i][j] = -1
+
+        self.matrix[2][2] = 0
+        self.matrix[self.size - 1][self.size - 1] = 1
         # GUI creation
         self.canvas = Canvas(self.root, width=self.size * self.coef + 2 * self.coef, height=self.size * self.coef + 2 * self.coef)
         self.canvas.pack()
@@ -48,11 +52,11 @@ class Game:
                              dash=(1, 1))
 
     def changePlayer(self):
-        if(self.turnId == 1):
-            self.turnId = 2
+        if(self.turnId == 0):
+            self.turnId = 1
             self.color = "red"
         else:
-            self.turnId = 1
+            self.turnId = 0
             self.color = "blue"
 
     def outcome(self, result):
@@ -72,60 +76,60 @@ class Game:
         self.root.destroy()
 
     def drawLine(self, endx, endy, color):
-        self.canvas.create_line(self.xHist[self.turnId] * self.coef + self.coef,
-                                self.yHist[self.turnId] * self.coef + self.coef,
+        self.canvas.create_line(self.xHist[self.turnId] * self.coef,
+                                self.yHist[self.turnId] * self.coef,
                                 endx,
                                 endy,
                                 fill=color, width=5)
 
     def moveUp(self):
-        if self.yHist[self.turnId] == 0 or self.matrix[self.xHist[self.turnId]][self.yHist[self.turnId] - 1] != 0:
-            self.drawLine(self.xHist[self.turnId] * self.coef + self.coef,
-                          (self.yHist[self.turnId] - 1) * self.coef + self.coef,
+        if self.matrix[self.xHist[self.turnId]][self.yHist[self.turnId] - 1] != -1:
+            self.drawLine(self.xHist[self.turnId] * self.coef,
+                          (self.yHist[self.turnId] - 1) * self.coef,
                           "yellow")
             self.outcome(False)
         else:
-            self.drawLine(self.xHist[self.turnId] * self.coef + self.coef,
-                          (self.yHist[self.turnId] - 1) * self.coef + self.coef,
+            self.drawLine(self.xHist[self.turnId] * self.coef,
+                          (self.yHist[self.turnId] - 1) * self.coef,
                           self.color)
             self.yHist[self.turnId] -= 1
             self.matrix[self.xHist[self.turnId]][self.yHist[self.turnId]] = self.turnId
 
     def moveRight(self):
-        if self.xHist[self.turnId] == self.size - 1 or self.matrix[self.xHist[self.turnId] + 1][self.yHist[self.turnId]] != 0:
-            self.drawLine((self.xHist[self.turnId] + 1) * self.coef + self.coef,
-                          self.yHist[self.turnId] * self.coef + self.coef,
+        if self.matrix[self.xHist[self.turnId] + 1][self.yHist[self.turnId]] != -1:
+            self.drawLine((self.xHist[self.turnId] + 1) * self.coef,
+                          self.yHist[self.turnId] * self.coef,
                           "yellow")
             self.outcome(False)
         else:
-            self.drawLine((self.xHist[self.turnId] + 1) * self.coef + self.coef,
-                          self.yHist[self.turnId] * self.coef + self.coef,
+            self.drawLine((self.xHist[self.turnId] + 1) * self.coef,
+                          self.yHist[self.turnId] * self.coef,
                           self.color)
             self.xHist[self.turnId] += 1
             self.matrix[self.xHist[self.turnId]][self.yHist[self.turnId]] = self.turnId
 
     def moveDown(self):
-        if self.yHist[self.turnId] == self.size - 1 or self.matrix[self.xHist[self.turnId]][self.yHist[self.turnId] + 1] != 0:
-            self.drawLine(self.xHist[self.turnId] * self.coef + self.coef,
-                          (self.yHist[self.turnId] + 1) * self.coef + self.coef,
+        if self.matrix[self.xHist[self.turnId]][self.yHist[self.turnId] + 1] != -1:
+            self.drawLine(self.xHist[self.turnId] * self.coef,
+                          (self.yHist[self.turnId] + 1) * self.coef,
                           "yellow")
             self.outcome(False)
         else:
-            self.drawLine(self.xHist[self.turnId] * self.coef + self.coef,
-                          (self.yHist[self.turnId] + 1) * self.coef + self.coef,
+            self.drawLine(self.xHist[self.turnId] * self.coef,
+                          (self.yHist[self.turnId] + 1) * self.coef,
                           self.color)
             self.yHist[self.turnId] += 1
             self.matrix[self.xHist[self.turnId]][self.yHist[self.turnId]] = self.turnId
 
     def moveLeft(self):
-        if self.xHist[self.turnId] == 0 or self.matrix[self.xHist[self.turnId] - 1][self.yHist[self.turnId]] != 0:
-            self.drawLine((self.xHist[self.turnId] - 1) * self.coef + self.coef,
-                          self.yHist[self.turnId] * self.coef + self.coef,
+        if self.matrix[self.xHist[self.turnId] - 1][self.yHist[self.turnId]] != -1:
+            self.drawLine((self.xHist[self.turnId] - 1) * self.coef,
+                          self.yHist[self.turnId] * self.coef,
                           "yellow")
             self.outcome(False)
         else:
-            self.drawLine((self.xHist[self.turnId] - 1) * self.coef + self.coef,
-                          self.yHist[self.turnId] * self.coef + self.coef,
+            self.drawLine((self.xHist[self.turnId] - 1) * self.coef,
+                          self.yHist[self.turnId] * self.coef,
                           self.color)
             self.xHist[self.turnId] -= 1
             self.matrix[self.xHist[self.turnId]][self.yHist[self.turnId]] = self.turnId

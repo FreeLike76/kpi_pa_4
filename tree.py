@@ -1,6 +1,11 @@
 import node as nd
 import numpy as np
 
-class tree:
-    def __init__(self, field):
-        self.node = nd.node(field)
+
+class Tree:
+    def __init__(self, field, xHist, yHist, mdepth):
+        self.mdepth = mdepth
+        self.root = nd.Node(field, xHist, yHist)
+
+    def build(self):
+        self.root.build(self.mdepth)
