@@ -1,8 +1,9 @@
 from tkinter import *
 import numpy as np
+import tree as tr
 
 class Game:
-    def __init__(self, size, firstplayer=True, coef=20):
+    def __init__(self, size, diff, firstplayer=True, coef=20):
         #Saving size and Gui coef
         self.root = Tk()
         self.size = size
@@ -22,14 +23,15 @@ class Game:
 
         # Inf field
         self.matrix = np.zeros((self.size + 2, self.size + 2))
-        for i in range (1, self.size + 1):
-            for j in range (1, self.size + 1):
+        for i in range(1, self.size + 1):
+            for j in range(1, self.size + 1):
                 self.matrix[i][j] = -1
-
         self.matrix[2][2] = 0
         self.matrix[self.size - 1][self.size - 1] = 1
+        self.ai = tr.Tree(self.matrix.copy(), self.xHist.copy(), self.yHist.copy(), diff)
+        self.ai.restructure()
         # GUI creation
-        self.canvas = Canvas(self.root, width=self.size * self.coef + 2 * self.coef, height=self.size * self.coef + 2 * self.coef)
+        self.canvas = Canvas(self.root, width=(self.size + 2) * self.coef, height=(self.size + 2) * self.coef)
         self.canvas.pack()
         frame = Frame(self.root)
         frame.pack(side=BOTTOM)
@@ -42,6 +44,7 @@ class Game:
         self.btn[1].pack(side=RIGHT)
         self.btn[3].pack(side=LEFT)
         self.btn[2].pack()
+
         #Drawing field lines
         for i in range(0, size):
             self.canvas.create_line(self.coef, i * self.coef + self.coef,
@@ -52,19 +55,21 @@ class Game:
                              dash=(1, 1))
 
     def changePlayer(self):
-        if(self.turnId == 0):
-            self.turnId = 1
-            self.color = "red"
-        else:
+        if self.turnId:
             self.turnId = 0
             self.color = "blue"
+        else:
+            self.playerMoved()
+            self.turnId = 1
+            self.color = "red"
+            self.botMoved()
 
-    def outcome(self, result):
+    def outcome(self):
         for button in self.btn:
             button.configure(state=DISABLED)
 
         window = Toplevel(self.root, width=300, height=200)
-        if(result):
+        if(self.turnId):
             windowl = Label(window, text="You Won")
         else:
             windowl = Label(window, text="You Lost")
@@ -84,52 +89,72 @@ class Game:
 
     def moveUp(self):
         if self.matrix[self.xHist[self.turnId]][self.yHist[self.turnId] - 1] != -1:
-            self.drawLine(self.xHist[self.turnId] * self.coef,
-                          (self.yHist[self.turnId] - 1) * self.coef,
-                          "yellow")
-            self.outcome(False)
+            self.outcome()
         else:
             self.drawLine(self.xHist[self.turnId] * self.coef,
                           (self.yHist[self.turnId] - 1) * self.coef,
                           self.color)
             self.yHist[self.turnId] -= 1
             self.matrix[self.xHist[self.turnId]][self.yHist[self.turnId]] = self.turnId
+            self.changePlayer()
 
     def moveRight(self):
         if self.matrix[self.xHist[self.turnId] + 1][self.yHist[self.turnId]] != -1:
-            self.drawLine((self.xHist[self.turnId] + 1) * self.coef,
-                          self.yHist[self.turnId] * self.coef,
-                          "yellow")
-            self.outcome(False)
+            self.outcome()
         else:
             self.drawLine((self.xHist[self.turnId] + 1) * self.coef,
                           self.yHist[self.turnId] * self.coef,
                           self.color)
             self.xHist[self.turnId] += 1
             self.matrix[self.xHist[self.turnId]][self.yHist[self.turnId]] = self.turnId
+            self.changePlayer()
 
     def moveDown(self):
         if self.matrix[self.xHist[self.turnId]][self.yHist[self.turnId] + 1] != -1:
-            self.drawLine(self.xHist[self.turnId] * self.coef,
-                          (self.yHist[self.turnId] + 1) * self.coef,
-                          "yellow")
-            self.outcome(False)
+            self.outcome()
         else:
             self.drawLine(self.xHist[self.turnId] * self.coef,
                           (self.yHist[self.turnId] + 1) * self.coef,
                           self.color)
             self.yHist[self.turnId] += 1
             self.matrix[self.xHist[self.turnId]][self.yHist[self.turnId]] = self.turnId
+            self.changePlayer()
 
     def moveLeft(self):
         if self.matrix[self.xHist[self.turnId] - 1][self.yHist[self.turnId]] != -1:
-            self.drawLine((self.xHist[self.turnId] - 1) * self.coef,
-                          self.yHist[self.turnId] * self.coef,
-                          "yellow")
-            self.outcome(False)
+            self.outcome()
         else:
             self.drawLine((self.xHist[self.turnId] - 1) * self.coef,
                           self.yHist[self.turnId] * self.coef,
                           self.color)
             self.xHist[self.turnId] -= 1
             self.matrix[self.xHist[self.turnId]][self.yHist[self.turnId]] = self.turnId
+            self.changePlayer()
+
+    def playerMoved(self):
+        for child in self.ai.root.nextNode:
+            if child.xHist[0] == self.xHist[0] and child.yHist[0] == self.yHist[0]:
+                self.ai.root = child
+                break
+
+    def botMoved(self):
+        if not self.ai.root.nextNode:
+            self.outcome()
+        else:
+            for child in self.ai.root.nextNode:
+                if self.ai.root.value == child.value:
+                    self.ai.root = child
+                    break
+            self.ai.restructure()
+            move = self.ai.root.xHist[1] - self.xHist[1]
+            if not move:
+                move = self.ai.root.yHist[1] - self.yHist[1]
+                if move == 1:
+                    self.moveDown()
+                elif move == -1:
+                    self.moveUp()
+            else:
+                if move == 1:
+                    self.moveRight()
+                elif move == -1:
+                    self.moveLeft()
