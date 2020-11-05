@@ -67,9 +67,9 @@ class Node:
                 and self.field[self.xHist[id]][self.yHist[id] + 1] != -1 \
                 and self.field[self.xHist[id] - 1][self.yHist[id]] != -1:
             if id:
-                self.value = -200
+                self.value = -36
             else:
-                self.value = 200
+                self.value = 36
         else:
             self.value = self.movediff()
 
