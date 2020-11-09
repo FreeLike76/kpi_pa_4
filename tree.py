@@ -7,5 +7,5 @@ class Tree:
         self.mdepth = mdepth
         self.root = nd.Node(field, xHist, yHist)
 
-    def restructure(self):
+    def buildtree(self):
         self.root.build(self.mdepth)

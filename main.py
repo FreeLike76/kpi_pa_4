@@ -12,9 +12,9 @@ root = Tk()
 vardiff = IntVar()
 vardiff.set(4)
 
-easy = Radiobutton(root, text="Easy", variable=vardiff, value=6)
-medium = Radiobutton(root, text="Medium", variable=vardiff, value=8)
-hard = Radiobutton(root, text="Hard", variable=vardiff, value=10)
+easy = Radiobutton(root, text="Easy", variable=vardiff, value=8)
+medium = Radiobutton(root, text="Medium", variable=vardiff, value=10)
+hard = Radiobutton(root, text="Hard", variable=vardiff, value=14)
 
 button = Button(text="Set", command=createGame)
 
@@ -25,5 +25,3 @@ hard.pack(side=TOP)
 button.pack(side=TOP)
 
 root.mainloop()
-
-

@@ -29,7 +29,7 @@ class Game:
         self.matrix[2][2] = 0
         self.matrix[self.size - 1][self.size - 1] = 1
         self.ai = tr.Tree(self.matrix.copy(), self.xHist.copy(), self.yHist.copy(), diff)
-        self.ai.restructure()
+        self.ai.buildtree()
         # GUI creation
         self.canvas = Canvas(self.root, width=(self.size + 2) * self.coef, height=(self.size + 2) * self.coef)
         self.canvas.pack()
@@ -145,7 +145,7 @@ class Game:
                 if self.ai.root.value == child.value:
                     self.ai.root = child
                     break
-            self.ai.restructure()
+            self.ai.buildtree()
             move = self.ai.root.xHist[1] - self.xHist[1]
             if not move:
                 move = self.ai.root.yHist[1] - self.yHist[1]

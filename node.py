@@ -8,46 +8,58 @@ class Node:
         self.xHist = xHist
         self.yHist = yHist
         self.value = 0
-
-    def build(self, depth):
+#No alpha-beta
+    def build1(self, depth):
         if depth != 0:
             if not self.nextNode:
-                curId = depth % 2
-                #up
-                if self.field[self.xHist[curId]][self.yHist[curId] - 1] == -1:
-                    fieldNext = self.field.copy()
-                    fieldNext[self.xHist[curId]][self.yHist[curId] - 1] = curId
-                    xHistNext = self.xHist.copy()
-                    yHistNext = self.yHist.copy()
-                    yHistNext[curId] -= 1
-                    self.nextNode.append(Node(fieldNext, xHistNext, yHistNext))
-                #right
-                if self.field[self.xHist[curId] + 1][self.yHist[curId]] == -1:
-                    fieldNext = self.field.copy()
-                    fieldNext[self.xHist[curId] + 1][self.yHist[curId]] = curId
-                    xHistNext = self.xHist.copy()
-                    yHistNext = self.yHist.copy()
-                    xHistNext[curId] += 1
-                    self.nextNode.append(Node(fieldNext, xHistNext, yHistNext))
-                #down
-                if self.field[self.xHist[curId]][self.yHist[curId] + 1] == -1:
-                    fieldNext = self.field.copy()
-                    fieldNext[self.xHist[curId]][self.yHist[curId] + 1] = curId
-                    xHistNext = self.xHist.copy()
-                    yHistNext = self.yHist.copy()
-                    yHistNext[curId] += 1
-                    self.nextNode.append(Node(fieldNext, xHistNext, yHistNext))
-                #left
-                if self.field[self.xHist[curId] - 1][self.yHist[curId]] == -1:
-                    fieldNext = self.field.copy()
-                    fieldNext[self.xHist[curId] - 1][self.yHist[curId]] = curId
-                    xHistNext = self.xHist.copy()
-                    yHistNext = self.yHist.copy()
-                    xHistNext[curId] -= 1
-                    self.nextNode.append(Node(fieldNext, xHistNext, yHistNext))
+                self.appendmoves(depth % 2)
             for child in self.nextNode:
                 child.build(depth - 1)
         self.eval(depth)
+#Optimized
+    def build(self, depth):
+        if depth != 0:
+            if not self.nextNode:
+                self.appendmoves(depth % 2)
+            for child in self.nextNode:
+                child.build(depth - 1)
+                if depth % 2 and child.value > 0:
+                    break
+        self.eval(depth)
+
+    def appendmoves(self, curId):
+        # up
+        if self.field[self.xHist[curId]][self.yHist[curId] - 1] == -1:
+            fieldNext = self.field.copy()
+            fieldNext[self.xHist[curId]][self.yHist[curId] - 1] = curId
+            xHistNext = self.xHist.copy()
+            yHistNext = self.yHist.copy()
+            yHistNext[curId] -= 1
+            self.nextNode.append(Node(fieldNext, xHistNext, yHistNext))
+        # right
+        if self.field[self.xHist[curId] + 1][self.yHist[curId]] == -1:
+            fieldNext = self.field.copy()
+            fieldNext[self.xHist[curId] + 1][self.yHist[curId]] = curId
+            xHistNext = self.xHist.copy()
+            yHistNext = self.yHist.copy()
+            xHistNext[curId] += 1
+            self.nextNode.append(Node(fieldNext, xHistNext, yHistNext))
+        # down
+        if self.field[self.xHist[curId]][self.yHist[curId] + 1] == -1:
+            fieldNext = self.field.copy()
+            fieldNext[self.xHist[curId]][self.yHist[curId] + 1] = curId
+            xHistNext = self.xHist.copy()
+            yHistNext = self.yHist.copy()
+            yHistNext[curId] += 1
+            self.nextNode.append(Node(fieldNext, xHistNext, yHistNext))
+        # left
+        if self.field[self.xHist[curId] - 1][self.yHist[curId]] == -1:
+            fieldNext = self.field.copy()
+            fieldNext[self.xHist[curId] - 1][self.yHist[curId]] = curId
+            xHistNext = self.xHist.copy()
+            yHistNext = self.yHist.copy()
+            xHistNext[curId] -= 1
+            self.nextNode.append(Node(fieldNext, xHistNext, yHistNext))
 
     def eval(self, depth):
         id = depth % 2
